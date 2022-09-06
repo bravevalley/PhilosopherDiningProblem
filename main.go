@@ -28,7 +28,7 @@ var sticks = map[int]string {
 }
 
 var wg sync.WaitGroup
-var mu *sync.Mutex
+var mu sync.Mutex
 
 func main() {
 
@@ -95,9 +95,13 @@ func philEat(phil string, rS int, lS int) {
 		// Time to eat
 		time.Sleep(time.Duration(period.eat) * time.Second)
 
+		
+
 		// Drop the sticks
 		sticks[rS] = fmt.Sprintln("Free")
 		sticks[lS] = fmt.Sprintln("Free")
+
+		fmt.Printf("\t%s JUST DROPPED stick %d and %d\n", phil, rS, lS)
 
 		mu.Unlock()
 		}
@@ -107,6 +111,6 @@ func philEat(phil string, rS int, lS int) {
 		fmt.Println(phil, "is thinking..... ")
 		time.Sleep(time.Duration(period.think) * time.Second)
 
-		fmt.Printf("\t\t%s has finished eating...", phil)
+		fmt.Printf("\t\t%s has finished eating...\n", phil)
 	wg.Done()
 }
