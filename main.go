@@ -52,7 +52,7 @@ func main() {
 		go philEat(philosopher[i], rightStick, leftStick)
 
 		// Make right stick the left to stimulate rotation
-		// rightStick = leftStick
+		rightStick = leftStick
 
 	}
 
@@ -71,8 +71,8 @@ func philEat(phil string, rS, lS *sync.Mutex) {
 
 	for i := 1; i <= period.feeding; i++ {
 
+		
 		// Lock the stick with the one eating
-
 		rS.Lock()
 		fmt.Printf("\t%s has picked up the right stick\n", phil)
 
