@@ -6,36 +6,28 @@ import (
 	"time"
 )
 
-// Number of times to eat the meal
-const feeding = 3
-
 var period = struct {
+	// Number of times to eat the meal
+	feeding int
+	// Time it takes to think
 	think int
-	eat   int
-	wait  int
+	// Time it takes to eat
+	eat int
+	// Time to wait
+	wait int
 }{
-	think: 2,
-	eat:   3,
-	wait:  2,
+	feeding: 3,
+	think:   2,
+	eat:     3,
+	wait:    2,
 }
 
-// var stickA sync.Mutex
-// var stickB sync.Mutex
-// var stickC sync.Mutex
-// var stickD sync.Mutex
-// var stickE sync.Mutex
-
-// var sticks = map[int]sync.Mutex {
-// 	1: stickA,
-// 	2: stickB,
-// 	3: stickC,
-// 	4: stickD,
-// 	5: stickD,
-// }
-
+// Initialize a WaitGroup
 var wg sync.WaitGroup
 
 func main() {
+
+	// Create the right Stick as a pointer type to sync.Mutex interface so we can call the lock function on the variable.
 	rightStick := &sync.Mutex{}
 
 	// Set the table - Hypothetical
@@ -49,13 +41,18 @@ func main() {
 
 	// Each philosopher is going to the table
 	// Loop through the philosopher slice and send each one to the table
-	for i:=0; i< len(philosopher); i++ {
+	for i := 0; i < len(philosopher); i++ {
 
+		// Create the let Stick as a pointer type to sync.Mutex interface so we can call the lock function on the variable.
 		leftStick := &sync.Mutex{}
 
+		// Create a goroutine in which all the philosophers will try to call the lock method of each stick
+		// If a philosopher is able to call lock on the the first stick then the routine stops until
+		// it is able to call the lock on the second stick
 		go philEat(philosopher[i], rightStick, leftStick)
 
-		rightStick = leftStick
+		// Make right stick the left to stimulate rotation
+		// rightStick = leftStick
 
 	}
 
@@ -72,7 +69,7 @@ func philEat(phil string, rS, lS *sync.Mutex) {
 
 	// Philosopher May begin eatting
 
-	for i := 1; i <= feeding; i++ {
+	for i := 1; i <= period.feeding; i++ {
 
 		// Lock the stick with the one eating
 
