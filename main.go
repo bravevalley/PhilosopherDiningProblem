@@ -19,18 +19,24 @@ var period = struct {
 	wait:  2,
 }
 
-var sticks = map[int]string{
-	1: "free",
-	2: "free",
-	3: "free",
-	4: "free",
-	5: "free",
-}
+// var stickA sync.Mutex
+// var stickB sync.Mutex
+// var stickC sync.Mutex
+// var stickD sync.Mutex
+// var stickE sync.Mutex
+
+// var sticks = map[int]sync.Mutex {
+// 	1: stickA,
+// 	2: stickB,
+// 	3: stickC,
+// 	4: stickD,
+// 	5: stickD,
+// }
 
 var wg sync.WaitGroup
-var mu sync.Mutex
 
 func main() {
+	rightStick := &sync.Mutex{}
 
 	// Set the table - Hypothetical
 	fmt.Println("The table is set!")
@@ -43,31 +49,21 @@ func main() {
 
 	// Each philosopher is going to the table
 	// Loop through the philosopher slice and send each one to the table
-	for i, v := range philosopher {
+	for i:=0; i< len(philosopher); i++ {
 
-		// Anonymous function to create a functionality and control flow
-		func(index int, value string) {
-			var leftStick int
-			var rightStick int
+		leftStick := &sync.Mutex{}
 
-			if index == len(philosopher)-1 {
-				rightStick = len(philosopher)
-				leftStick = len(philosopher) - index
-			} else {
-				rightStick = index + 1
-				leftStick = index + 2
-			}
+		go philEat(philosopher[i], rightStick, leftStick)
 
-			go philEat(value, rightStick, leftStick)
+		rightStick = leftStick
 
-		}(i, v)
 	}
 
 	wg.Wait()
 
 }
 
-func philEat(phil string, rS int, lS int) {
+func philEat(phil string, rS, lS *sync.Mutex) {
 
 	// Whois at the table
 	fmt.Printf("%s is at the table and ready to eat\n", phil)
@@ -79,34 +75,27 @@ func philEat(phil string, rS int, lS int) {
 	for i := 1; i <= feeding; i++ {
 
 		// Lock the stick with the one eating
-		mu.Lock()
 
-		fmt.Printf("\t%s has picked up stick %d\n", phil, lS)
-		sticks[lS] = fmt.Sprintln("In use")
-		
+		rS.Lock()
+		fmt.Printf("\t%s has picked up the right stick\n", phil)
+
 		// Update the stick in use
 		// Pick up the sticks to eat
-		fmt.Printf("\t%s has picked up stick %d\n", phil, rS)
-		sticks[rS] = fmt.Sprintln("In use")
+		lS.Lock()
+		fmt.Printf("\t%s has picked up the stick left\n", phil)
 
 		// Sleep for a Second
 		time.Sleep(1 * time.Second)
 
-		
 		// Time to eat
-		fmt.Printf("\t%s has stick %d and %d  ---  is eating...\n", phil, rS, lS)
+		fmt.Printf("%s has both sticks --- now eating...\n", phil)
 		time.Sleep(time.Duration(period.eat) * time.Second)
 
-		sticks[rS] = fmt.Sprintln("Free")
-		
-		fmt.Printf("\t%s JUST DROPPED stick %d\n", phil, rS)
-		
-		mu.Unlock()
-
 		// Drop the sticks
-		sticks[lS] = fmt.Sprintln("Free")
-
-		fmt.Printf("\t%s JUST DROPPED stick %d\n", phil, lS)
+		fmt.Printf("\t\t%s JUST DROPPED the right stick\n", phil)
+		rS.Unlock()
+		fmt.Printf("\t\t%s JUST DROPPED the left stick\n", phil)
+		lS.Unlock()
 
 	}
 
