@@ -25,6 +25,12 @@ var period = struct {
 // Initialize a WaitGroup
 var wg sync.WaitGroup
 
+// Keeping track of order
+var position []string
+
+// Lock the slice
+var mu sync.Mutex
+
 func main() {
 
 	// Create the right Stick as a pointer type to sync.Mutex interface so we can call the lock function on the variable.
@@ -58,6 +64,10 @@ func main() {
 
 	wg.Wait()
 
+	for i, v := range position {
+		fmt.Printf("%s finished at position %d\n", v, i+1)
+	}
+
 }
 
 func philEat(phil string, rS, lS *sync.Mutex) {
@@ -71,7 +81,6 @@ func philEat(phil string, rS, lS *sync.Mutex) {
 
 	for i := 1; i <= period.feeding; i++ {
 
-		
 		// Lock the stick with the one eating
 		rS.Lock()
 		fmt.Printf("\t%s has picked up the right stick\n", phil)
@@ -102,5 +111,10 @@ func philEat(phil string, rS, lS *sync.Mutex) {
 	time.Sleep(time.Duration(period.think) * time.Second)
 
 	fmt.Printf("\t\t%s has finished eating...\n", phil)
+	
+	mu.Lock()
+	position = append(position, phil)
+	mu.Unlock()
+
 	wg.Done()
 }
