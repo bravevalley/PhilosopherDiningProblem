@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -65,7 +67,22 @@ func main() {
 	wg.Wait()
 
 	for i, v := range position {
-		fmt.Printf("%s finished at position %d\n", v, i+1)
+		// Convert index to string
+		pos := strconv.Itoa(i + 1)
+		var fin string
+
+		// Test string suffix to append the positonal order
+		if strings.HasSuffix(pos, "1") {
+			fin = fmt.Sprintf("%sst", pos)
+		} else if strings.HasSuffix(pos, "2") {
+			fin = fmt.Sprintf("%snd", pos)
+		} else if strings.HasSuffix(pos, "3") {
+			fin = fmt.Sprintf("%srd", pos)
+		} else {
+			fin = fmt.Sprintf("%sth", pos)
+		}
+
+		fmt.Printf("%s finished %s\n", v, fin)
 	}
 
 }
@@ -111,7 +128,7 @@ func philEat(phil string, rS, lS *sync.Mutex) {
 	time.Sleep(time.Duration(period.think) * time.Second)
 
 	fmt.Printf("\t\t%s has finished eating...\n", phil)
-	
+
 	mu.Lock()
 	position = append(position, phil)
 	mu.Unlock()
