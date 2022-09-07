@@ -19,7 +19,7 @@ var period = struct {
 	wait:  2,
 }
 
-var sticks = map[int]string {
+var sticks = map[int]string{
 	1: "free",
 	2: "free",
 	3: "free",
@@ -76,41 +76,45 @@ func philEat(phil string, rS int, lS int) {
 
 	// Philosopher May begin eatting
 
-	for i := 1; i < feeding; i++ {
+	for i := 1; i <= feeding; i++ {
 
 		// Lock the stick with the one eating
 		mu.Lock()
 
+		fmt.Printf("\t%s has picked up stick %d\n", phil, lS)
+		sticks[lS] = fmt.Sprintln("In use")
+		
+		// Update the stick in use
 		// Pick up the sticks to eat
-		fmt.Printf("\t%s has picked up stick %d and %d\n", phil, rS, lS)
+		fmt.Printf("\t%s has picked up stick %d\n", phil, rS)
+		sticks[rS] = fmt.Sprintln("In use")
 
 		// Sleep for a Second
 		time.Sleep(1 * time.Second)
 
-		// Update the stick in use
-		sticks[rS] = fmt.Sprintln("In use")
-		sticks[lS] = fmt.Sprintln("In use")
-
-
+		
 		// Time to eat
+		fmt.Printf("\t%s has stick %d and %d  ---  is eating...\n", phil, rS, lS)
 		time.Sleep(time.Duration(period.eat) * time.Second)
 
+		sticks[rS] = fmt.Sprintln("Free")
 		
+		fmt.Printf("\t%s JUST DROPPED stick %d\n", phil, rS)
+		
+		mu.Unlock()
 
 		// Drop the sticks
-		sticks[rS] = fmt.Sprintln("Free")
 		sticks[lS] = fmt.Sprintln("Free")
 
-		fmt.Printf("\t%s JUST DROPPED stick %d and %d\n", phil, rS, lS)
+		fmt.Printf("\t%s JUST DROPPED stick %d\n", phil, lS)
 
-		mu.Unlock()
-		}
+	}
 
-		// Time to think
+	// Time to think
 
-		fmt.Println(phil, "is thinking..... ")
-		time.Sleep(time.Duration(period.think) * time.Second)
+	fmt.Println(phil, "is thinking..... ")
+	time.Sleep(time.Duration(period.think) * time.Second)
 
-		fmt.Printf("\t\t%s has finished eating...\n", phil)
+	fmt.Printf("\t\t%s has finished eating...\n", phil)
 	wg.Done()
 }
